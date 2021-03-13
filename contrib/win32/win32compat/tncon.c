@@ -188,7 +188,14 @@ ReadConsoleForTermEmul(HANDLE hInput, char *destin, int destinlen)
 					}
 
 					if (isConsoleVTSeqAvailable) {
-						if (inputRecord.Event.KeyEvent.uChar.UnicodeChar != L'\0') {
+/*					if (inputRecord.Event.KeyEvent.uChar.UnicodeChar != L'\0') { */
+/* https://github.com/microsoft/terminal/issues/2865#issuecomment-782820141
+ * Forward ctrl+space to remote applications.
+*/
+					DWORD dwControlKeyState = inputRecord.Event.KeyEvent.dwControlKeyState;
+					DWORD dwCtrlPressed = (dwControlKeyState & LEFT_CTRL_PRESSED);
+					if (inputRecord.Event.KeyEvent.uChar.UnicodeChar != L'\0' ||
+					    (dwCtrlPressed && inputRecord.Event.KeyEvent.wVirtualKeyCode == 50)) {
 							n = WideCharToMultiByte(
 								CP_UTF8,
 								0,
